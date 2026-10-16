@@ -7,7 +7,7 @@ Extract information from form images and provide single-document QA, single-docu
 - Requirements source: [Machine Learning Assignment.pdf](../assignment/Machine%20Learning%20Assignment.pdf), all 2 pages.
 - Data review scope: 11 PNG files in [data/raw/project_data/](../data/raw/project_data/).
 - `assignment/job-description.md` has not been read and is excluded from the requirements.
-- This document is a plan. The checklists below do not indicate completed implementation.
+- This document records the plan and verified progress. Only Phase 1 is complete; later phases remain unimplemented.
 - Comprehensive accuracy evaluation, failure analysis, before-and-after comparisons, cost dashboards, and additional infrastructure are deferred to future extensions.
 - Validation against the actual source documents and recording processing time and API-reported token usage for each model call are included in the current scope.
 
@@ -93,12 +93,39 @@ Do not bind all document understanding to fixed coordinates merely because the c
 
 ### Phase 1: Establish Document Identification and Data Formats
 
-- [ ] Inventory the 11 inputs by document.
-- [ ] Define shared formats for documents, fields, tables, evidence, and answers.
-- [ ] Create a small set of manually verified expected values and validation questions from the sources.
-- [ ] Include cases covering readable values, blanks, damaged values, checkboxes, and service tables.
+- [x] Inventory the 11 inputs by document.
+- [x] Define shared formats for documents, fields, tables, evidence, and answers.
+- [x] Create a small set of manually verified expected values and validation questions from the sources.
+- [x] Include cases covering readable values, blanks, damaged values, checkboxes, and service tables.
 
 **Validation:** Check that different documents are not mixed and that filename page numbers are not confused with printed page numbers. Establish expected values by checking the original images, rather than copying model outputs.
+
+**Verified on 2026-10-16:** The initial Git working tree was clean and contained
+only the two plans and `.gitignore`; no existing implementation was duplicated.
+Implemented `src/form_agent/{inventory,models,validate_local}.py`, synthetic tests,
+and Phase 1 execution instructions in `README.md`. Standard-library-only setup
+is recorded in `requirements.txt`.
+
+All 11 original images were opened to review their printed footers. The local
+inventory preserves 11 distinct UUIDs and hashes, dimensions, filenames,
+filename pages (7 page-1 and 4 page-2 files), and independently reviewed printed
+pages. No files are merged. Four source images supply 41 evidence items and
+10 English validation questions, covering readable values, blanks, damaged
+issuer text, checked/unchecked boxes, explicit Unknown, leading-zero codes,
+and service/diagnosis row associations. Incomplete descriptions remain literal.
+
+Validation passed: 12 synthetic unit tests; local source/hash and contract
+validation for 11 inputs, 4 partial expected documents, and 10 questions;
+JSON round trips; PNG SHA-256 comparison before/after; Git exclusion checks.
+These checks validate Phase 1 artifacts, not extraction or QA accuracy.
+
+GitHub candidates: source code, synthetic tests, README, requirements, ignore
+rules, and both plans. Source-derived inventory, expectations, and prior demo
+reference values remain under ignored `data/validation/`. Existing source data
+was not changed. `assignment/job-description.md` was not read. No model API,
+extraction pipeline, QA, summarization, UI, commit, or push was performed.
+Remaining decisions: provider/model, additional upload formats, normalization
+policies, and extraction prompts. Phase 2 onward is deferred.
 
 ### Phase 2: Implement and Validate the Extraction Pipeline
 
@@ -168,36 +195,14 @@ Connect the UI after these criteria are met. Do not present this small validatio
 
 **Validation:** Record example results only after actual execution and comparison with source documents. Check for missing manual steps from environment setup through demo and UI execution. Place meaningful core validation needed for the implementation in `/tests`; do not build a separate evaluation dashboard.
 
-## 6. Required Demos (3)
+## 6. Required Demos (Planned)
 
-The expected values below were manually checked against the source documents. They are not model execution results and must be compared with actual outputs after implementation.
-
-### Demo 1: Single-Document QA
-
-- Document: [00c33de5…TX_page_1.png](../data/raw/project_data/00c33de5-461e-4642-966b-73ee20ef0d27_TX_page_1.png)
-- Question: “Is this request urgent? What are the number of treatment sessions and the duration?”
-- Expected result: Urgent request, 6 treatment sessions, duration of 1 week.
-- Sources: Review Type in Section II; Number of Sessions and Duration in Section V.
-- Additional validation question: “Why is it urgent?”
-- Additional expected result: Explain that the document does not state the reason for urgency.
-
-### Demo 2: Single-Document Summarization
-
-- Document: [00e0cf8a…TX_page_1.png](../data/raw/project_data/00e0cf8a-1932-4ab7-b5ce-ad1c80e7c01d_TX_page_1.png)
-- Task: Summarize the nature of the request, services, treatment type, session count, and duration.
-- Expected key content: Non-Urgent, Initial Request, 3 service rows, Outpatient, Cardiac Rehab, 7 sessions, 2 weeks.
-- Validation: Check that service table rows are not omitted, incomplete descriptions are not arbitrarily completed, and each factual statement has supporting evidence.
-
-### Demo 3: Synthesized Answer Across Multiple Documents
-
-- Documents: The documents from Demos 1 and 2, plus [0a01f77b…TX_page_1.png](../data/raw/project_data/0a01f77b-85f9-48c9-89bf-4b095bebb438_TX_page_1.png).
-- Question: “Compare urgency, treatment types, session counts, and durations across the three documents, and summarize their similarities and differences.”
-- Expected aggregate: 1 of the 3 requests is urgent; all three documents indicate Outpatient.
-- Expected values by document:
-  - `00c33de5…`: Urgent, Mental Health/Substance Abuse, 6 sessions, 1 week.
-  - `00e0cf8a…`: Non-Urgent, Cardiac Rehab, 7 sessions, 2 weeks.
-  - `0a01f77b…`: Non-Urgent, Physical Therapy, 4 sessions, 2 weeks.
-- Validation: Compare with each document's original checkboxes and numerical values. The denominator must be the 3 selected documents, and each comparison item must have a source.
+Single-document QA, single-document summarization, and a synthesized answer
+across multiple documents remain required future demos. None has been executed.
+Previously recorded source-specific demo expectations now reside only in
+`data/validation/prior-demo-expectations.md` (Git-ignored). The Phase 1 reviewed
+questions and expected answers are in `data/validation/expected-values.json`.
+These local reference files are not model outputs or GitHub upload candidates.
 
 ## 7. Per-Call Timing and Token Logging
 
